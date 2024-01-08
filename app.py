@@ -215,12 +215,16 @@ def main_app():
 
 
 def main():
+     #if 'agreed_to_terms' not in st.session_state:
+       #  st.session_state.agreed_to_terms = False
 
+     #if not st.session_state.agreed_to_terms:
+       #  welcome_page()
+     #else:
         main_app()
 
 if __name__ == "__main__":
     main()
-
 
 
 
