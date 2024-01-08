@@ -183,8 +183,8 @@ def main_app():
 
             # Display the response from OpenAI
             if response and response.choices:
-                ai_message = response.choices[0].message.content
-                st.write(f"Antwort basierend auf der Rechtsstellungsverordnung: {ai_message}")
+                st.subheader("Antwort basierend auf dem Stimm- und Wahlrechtsgesetz:")
+                st.write(ai_message)
         else:
             st.warning("Bitte geben Sie eine Anfrage ein.")
 
