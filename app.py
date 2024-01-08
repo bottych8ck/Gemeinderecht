@@ -148,6 +148,10 @@ def main_app():
     st.title("Abfrage des Gesetzes über das Stimm- und Wahlrecht des Kantons Thurgau")
     if 'prompt' not in st.session_state:
         st.session_state['prompt'] = ""
+    if 'top_articles' not in st.session_state:
+        st.session_state.top_articles = []
+    if 'submitted' not in st.session_state:
+        st.session_state.submitted = False
 
     # User inputs
     user_query = st.text_input("Hier Ihre Frage eingeben:")
