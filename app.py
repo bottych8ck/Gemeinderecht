@@ -155,64 +155,99 @@ def main_app():
     relevance_options = ["Gemeindeversammlung", "Urnenwahl", "nicht relevant"]
     relevance = st.selectbox("Wählen Sie aus, ob sich die Frage auf Gemeindeversammlungen oder Urnenwahlen bezieht, oder ob dies nicht relevant ist:", relevance_options)
 
-    # Initialize session state variables if they don't exist
-    if 'top_articles' not in st.session_state:
-        st.session_state.top_articles = []
-    if 'submitted' not in st.session_state:
-        st.session_state.submitted = False
 
-    # "Abschicken" button to display top matching articles
     if st.button("Abschicken"):
-        st.session_state.submitted = True  # Set the flag to True when clicked
         if user_query:
-            # Process the query for top articles
+            # Enhance the user query with the relevance mapping
             enhanced_user_query = user_query + " " + relevance_mapping.get(relevance, "")
+            # Get the query vector
             query_vector = get_embeddings(enhanced_user_query)
+            # Filter relevant articles based on relevance
             relevant_lawcontent_dict = get_relevant_articles(law_data, relevance)
+            # Calculate similarities
             similarities = calculate_similarities(query_vector, {title: article_embeddings[title] for title in relevant_lawcontent_dict if title in article_embeddings})
-            sorted_articles = sorted(similarities.items(), key=lambda x: x[1], reverse=True)[:5]  # Get only top 5 articles
-            st.session_state.top_articles = sorted_articles  # Update session state
-            st.write("Die folgenden Artikel werden angezeigt, nachdem Ihre Anfrage analysiert und mit den relevanten Gesetzesdaten abgeglichen wurde. Dieser Prozess funktioniert ähnlich wie eine intelligente Suche, bei der die Bedeutung Ihrer Worte erkannt und die passendsten Inhalte aus den Gesetzestexten ausgewählt werden. Die Bestimmungen müssen aber genau auf ihre tatächliche Anwendbarkeit hin überprüft werden.")
+            # Sort and get top 5 articles
+            sorted_articles = sorted(similarities.items(), key=lambda x: x[1], reverse=True)[:5]
 
-            with st.expander("Am besten auf die Anfrage passende Artikel", expanded=False):
-                for title, score in st.session_state.top_articles:
-                    # Retrieve the content of the article using the get_article_content function
-                    article_content = get_article_content(title, law_data)  # Correctly passing the title and law_data
-                    if article_content:  # Check if there is content available for the article
-                        st.write(f" {title}:")  # Display the article title
-                        for paragraph in article_content:  # Display each paragraph of the article
-                            st.write(paragraph)
-                    else:
-                        st.write(f"§ {title}: Kein Inhalt verfügbar.")  # Indicate if no content is available for the article
-                    st.write("")  # Add a space after each article
-        else:
-            st.warning("Bitte geben Sie eine Anfrage ein.")
-            
-    if st.session_state.submitted:
-        # Button to trigger the API call and display the response
-        if st.button("Antwort anzeigen"):
-            if user_query and st.session_state.top_articles:
-                # Generate the prompt (but don't display it)
-                prompt = generate_prompt(user_query, relevance, st.session_state.top_articles, law_data)
-    
-                # Send the prompt to OpenAI API
-                response = client.chat.completions.create(
-                    model="gpt-4-1106-preview",
-                    messages=[
-                        {"role": "system", "content": "Du bist eine Gesetzessumptionsmaschiene. Du beantwortest alle Fragen auf Deutsch."},
-                        {"role": "user", "content": prompt}
-                    ]
-                )
+            # Generate the prompt
+            prompt = generate_prompt(user_query, relevance, sorted_articles, law_data)
+
+            # Send the prompt to OpenAI API and get response
+            response = client.chat.completions.create(
+                model="gpt-4-1106-preview",
+                messages=[
+                    {"role": "system", "content": "Du bist eine Gesetzessumptionsmaschiene. Du beantwortest alle Fragen auf Deutsch."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
 
             # Display the response from OpenAI
             if response and response.choices:
                 ai_message = response.choices[0].message.content
                 st.write(f"Antwort basierend auf der Rechtsstellungsverordnung: {ai_message}")
         else:
-            if not user_query:
-                st.warning("Bitte geben Sie eine Anfrage ein.")
-            if not st.session_state.top_articles:
-                st.warning("Bitte klicken Sie zuerst auf 'Abschicken', um die passenden Artikel zu ermitteln.")
+            st.warning("Bitte geben Sie eine Anfrage ein.")
+
+
+
+    # Initialize session state variables if they don't exist
+    #if 'top_articles' not in st.session_state:
+     #   st.session_state.top_articles = []
+    #if 'submitted' not in st.session_state:
+     #   st.session_state.submitted = False
+
+    # "Abschicken" button to display top matching articles
+    #if st.button("Abschicken"):
+     #   st.session_state.submitted = True  # Set the flag to True when clicked
+      #  if user_query:
+       #     # Process the query for top articles
+        #    enhanced_user_query = user_query + " " + relevance_mapping.get(relevance, "")
+         #   query_vector = get_embeddings(enhanced_user_query)
+          #  relevant_lawcontent_dict = get_relevant_articles(law_data, relevance)
+           # similarities = calculate_similarities(query_vector, {title: article_embeddings[title] for title in relevant_lawcontent_dict if title in article_embeddings})
+            #sorted_articles = sorted(similarities.items(), key=lambda x: x[1], reverse=True)[:5]  # Get only top 5 articles
+            #st.session_state.top_articles = sorted_articles  # Update session state
+            #st.write("Die folgenden Artikel werden angezeigt, nachdem Ihre Anfrage analysiert und mit den relevanten Gesetzesdaten abgeglichen wurde. Dieser Prozess funktioniert ähnlich wie eine intelligente Suche, bei der die Bedeutung Ihrer Worte erkannt und die passendsten Inhalte aus den Gesetzestexten ausgewählt werden. Die Bestimmungen müssen aber genau auf ihre tatächliche Anwendbarkeit hin überprüft werden.")
+
+            #with st.expander("Am besten auf die Anfrage passende Artikel", expanded=False):
+            #    for title, score in st.session_state.top_articles:
+             #       # Retrieve the content of the article using the get_article_content function
+              #      article_content = get_article_content(title, law_data)  # Correctly passing the title and law_data
+               #     if article_content:  # Check if there is content available for the article
+                #        st.write(f" {title}:")  # Display the article title
+                 #       for paragraph in article_content:  # Display each paragraph of the article
+                  #          st.write(paragraph)
+                   # else:
+                    #    st.write(f"§ {title}: Kein Inhalt verfügbar.")  # Indicate if no content is available for the article
+                    #st.write("")  # Add a space after each article
+        #else:
+         #   st.warning("Bitte geben Sie eine Anfrage ein.")
+            
+    #if st.session_state.submitted:
+        # Button to trigger the API call and display the response
+     #   if st.button("Antwort anzeigen"):
+      #      if user_query and st.session_state.top_articles:
+                # Generate the prompt (but don't display it)
+       #         prompt = generate_prompt(user_query, relevance, st.session_state.top_articles, law_data)
+    
+                # Send the prompt to OpenAI API
+        #        response = client.chat.completions.create(
+         #           model="gpt-4-1106-preview",
+          #          messages=[
+           #             {"role": "system", "content": "Du bist eine Gesetzessumptionsmaschiene. Du beantwortest alle Fragen auf Deutsch."},
+            #            {"role": "user", "content": prompt}
+             #       ]
+              #  )
+
+            # Display the response from OpenAI
+            #if response and response.choices:
+             #   ai_message = response.choices[0].message.content
+              #  st.write(f"Antwort basierend auf der Rechtsstellungsverordnung: {ai_message}")
+        #else:
+         #   if not user_query:
+          #      st.warning("Bitte geben Sie eine Anfrage ein.")
+           # if not st.session_state.top_articles:
+            #    st.warning("Bitte klicken Sie zuerst auf 'Abschicken', um die passenden Artikel zu ermitteln.")
 
 
 def main():
