@@ -146,24 +146,12 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
 
 def main_app():
     st.title("Abfrage des Gesetzes über das Stimm- und Wahlrecht des Kantons Thurgau")
-    if 'prompt' not in st.session_state:
-        st.session_state['prompt'] = ""
-    if 'top_articles' not in st.session_state:
-        st.session_state.top_articles = []
-    if 'submitted' not in st.session_state:
-        st.session_state.submitted = False
-
     # User inputs
     user_query = st.text_input("Hier Ihre Frage eingeben:")
     relevance_options = ["Gemeindeversammlung", "Urnenwahl", "nicht relevant"]
     relevance = st.selectbox("Wählen Sie aus, ob sich die Frage auf Gemeindeversammlungen oder Urnenwahlen bezieht, oder ob dies nicht relevant ist:", relevance_options)
 
     # Initialize session state variables if they don't exist
-    if 'top_articles' not in st.session_state:
-        st.session_state.top_articles = []
-    if 'submitted' not in st.session_state:
-        st.session_state.submitted = False
-
     # "Abschicken" button to display top matching articles
     if st.button("Abschicken"):
         st.session_state.submitted = True  # Set the flag to True when clicked
@@ -191,21 +179,21 @@ def main_app():
         else:
             st.warning("Bitte geben Sie eine Anfrage ein.")
             
-if st.session_state.submitted:
-    # Button to trigger the API call and display the response
-    if st.button("Antwort anzeigen"):
-        if user_query and st.session_state.top_articles:
-            # Generate the prompt (but don't display it)
-            prompt = generate_prompt(user_query, relevance, st.session_state.top_articles, law_data)
-
-            # Send the prompt to OpenAI API
-            response = client.chat.completions.create(
-                model="gpt-4-1106-preview",
-                messages=[
-                    {"role": "system", "content": "Du bist eine Gesetzessumptionsmaschiene. Du beantwortest alle Fragen auf Deutsch."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
+    if st.session_state.submitted:
+        # Button to trigger the API call and display the response
+        if st.button("Antwort anzeigen"):
+            if user_query and st.session_state.top_articles:
+                # Generate the prompt (but don't display it)
+                prompt = generate_prompt(user_query, relevance, st.session_state.top_articles, law_data)
+    
+                # Send the prompt to OpenAI API
+                response = client.chat.completions.create(
+                    model="gpt-4-1106-preview",
+                    messages=[
+                        {"role": "system", "content": "Du bist eine Gesetzessumptionsmaschiene. Du beantwortest alle Fragen auf Deutsch."},
+                        {"role": "user", "content": prompt}
+                    ]
+                )
 
             # Display the response from OpenAI
             if response and response.choices:
@@ -219,7 +207,13 @@ if st.session_state.submitted:
 
 
 def main():
-     #if 'agreed_to_terms' not in st.session_state:
+    if 'prompt' not in st.session_state:
+        st.session_state['prompt'] = ""
+    if 'top_articles' not in st.session_state:
+        st.session_state.top_articles = []
+    if 'submitted' not in st.session_state:
+        st.session_state.submitted = False 
+    #if 'agreed_to_terms' not in st.session_state:
        #  st.session_state.agreed_to_terms = False
 
      #if not st.session_state.agreed_to_terms:
