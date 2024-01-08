@@ -171,7 +171,7 @@ def main_app():
             similarities = calculate_similarities(query_vector, {title: article_embeddings[title] for title in relevant_lawcontent_dict if title in article_embeddings})
             sorted_articles = sorted(similarities.items(), key=lambda x: x[1], reverse=True)[:5]  # Get only top 5 articles
             st.session_state.top_articles = sorted_articles  # Update session state
-            st.write("Die folgenden Artikel werden angezeigt, nachdem Ihre Anfrage analysiert und mit den relevanten Gesetzesdaten abgeglichen wurde. Dieser Prozess funktioniert ähnlich wie eine intelligente Suche, bei der die Bedeutung Ihrer Worte erkannt und die passendsten Inhalte aus den Gesetzestexten ausgewählt werden. Die Bestimmungen müssen aber genau auf ihre tatächliche Anwendbarkeit hin überprüft werden. Diese Überprüfung kann durch ein LLM (Large Language Model) unterstützt werden. Im generierten Prompt sind entsprechende Anweisungen enthalten.")
+            st.write("Die folgenden Artikel werden angezeigt, nachdem Ihre Anfrage analysiert und mit den relevanten Gesetzesdaten abgeglichen wurde. Dieser Prozess funktioniert ähnlich wie eine intelligente Suche, bei der die Bedeutung Ihrer Worte erkannt und die passendsten Inhalte aus den Gesetzestexten ausgewählt werden. Die Bestimmungen müssen aber genau auf ihre tatächliche Anwendbarkeit hin überprüft werden.")
 
             with st.expander("Am besten auf die Anfrage passende Artikel", expanded=False):
                 for title, score in st.session_state.top_articles:
@@ -187,37 +187,32 @@ def main_app():
         else:
             st.warning("Bitte geben Sie eine Anfrage ein.")
             
-    if st.session_state.submitted:
-        if st.button("Prompt generieren"):
-            if user_query and st.session_state.top_articles:
-                # Generate and display the prompt
-                prompt = generate_prompt(user_query, relevance, st.session_state.top_articles, law_data)
-                st.text_area("Prompt:", prompt, height=300)
-                st.session_state['prompt'] = prompt
-                # Button to copy the prompt to clipboard
-                html_with_js = generate_html_with_js(prompt)
-                html(html_with_js)
-            
-            else:
-                if not user_query:
-                    st.warning("Bitte geben Sie eine Anfrage ein.")
-                if not st.session_state.top_articles:
-                    st.warning("Bitte klicken Sie zuerst auf 'Abschicken', um die passenden Artikel zu ermitteln.")
+if st.session_state.submitted:
+    # Button to trigger the API call and display the response
     if st.button("Antwort anzeigen"):
-        if st.session_state['prompt']:
+        if user_query and st.session_state.top_articles:
+            # Generate the prompt (but don't display it)
+            prompt = generate_prompt(user_query, relevance, st.session_state.top_articles, law_data)
+
+            # Send the prompt to OpenAI API
             response = client.chat.completions.create(
                 model="gpt-4-1106-preview",
                 messages=[
                     {"role": "system", "content": "Du bist eine Gesetzessumptionsmaschiene. Du beantwortest alle Fragen auf Deutsch."},
-                    {"role": "user", "content": st.session_state['prompt']}  # Use the prompt from session state
+                    {"role": "user", "content": prompt}
                 ]
             )
-    
+
+            # Display the response from OpenAI
             if response and response.choices:
                 ai_message = response.choices[0].message.content
                 st.write(f"Antwort basierend auf der Rechtsstellungsverordnung: {ai_message}")
         else:
-            st.warning("Bitte generieren Sie zuerst den Prompt.")
+            if not user_query:
+                st.warning("Bitte geben Sie eine Anfrage ein.")
+            if not st.session_state.top_articles:
+                st.warning("Bitte klicken Sie zuerst auf 'Abschicken', um die passenden Artikel zu ermitteln.")
+
 
 def main():
      #if 'agreed_to_terms' not in st.session_state:
