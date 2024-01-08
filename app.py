@@ -146,7 +146,8 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
 
 
 def main_app():
-    st.title("Abfrage des Gesetzes über das Stimm- und Wahlrecht des Kantons Thurgau")
+    st.title("Willkommen zu ChatG-TG)
+    st.subheader("Abfrage des Gesetzes über das Stimm- und Wahlrecht des Kantons Thurgau"
     if 'prompt' not in st.session_state:
         st.session_state['prompt'] = ""
 
