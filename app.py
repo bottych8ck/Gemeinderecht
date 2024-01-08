@@ -138,7 +138,8 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
         prompt += f"   - **Inhalt:** {content}\n"
         article_number += 1
 
-    prompt += "\n\nAnfrage auf Deutsch beantworten. Versuche, eine kurze Antwort zu geben. Sei aber genau, wenn es um die Anwendbarkeit des § geht. \n"
+    prompt += "\nAnswer in German. If a § doesn't say anything relevant to the question don't mention it in your answer.\n"
+    prompt += "Anfrage auf Deutsch beantworten. Versuche, eine kurze Antwort zu schreiben, prüfe aber die Anwendbarkeit der § genau. Wenn ein Artikel keine einschlägigen Aussagen enthält, erwähne ihn in der Antwort nicht\n"
 
     return prompt
 
@@ -150,7 +151,7 @@ def main_app():
         st.session_state['prompt'] = ""
 
     # User inputs
-    user_query = st.text_input("Hier Ihre Frage eingeben:")
+    user_query = st.text_input("Hier Ihre Frage zum Thurgauer Stimm- und Wahlrechtsgesetz eingeben:")
     relevance_options = ["Gemeindeversammlung", "Urnenwahl", "nicht relevant"]
     relevance = st.selectbox("Wählen Sie aus, ob sich die Frage auf Gemeindeversammlungen oder Urnenwahlen bezieht, oder ob dies nicht relevant ist:", relevance_options)
 
