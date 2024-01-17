@@ -10,7 +10,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 relevance_mapping = {
     "Gemeindeversammlung": "Die Frage bezieht sich auf Gemeindeversammlungen.",
-    "Urnenwahl": "Die Frage bezieht sich auf Wahlen an der Urne.",
+    "Urnenwahl/Urnenabstimmung": "Die Frage bezieht sich auf Wahlen an der Urne.",
     "nicht relevant": "Die Frage ist allgemein und nicht spezifisch relevant für die Gemeindeversammlung oder Urnenwahl."
 }
 
