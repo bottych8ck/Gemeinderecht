@@ -127,7 +127,7 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
         # Check direct applicability based on user's choice
         if relevance == "Gemeindeversammlung":
             applicability = "Dieser § ist direkt auf Gemeindeversammlungen anwendbar." if "Directly Applicable: Assembly" in article.get("tags", []) else "Dieser § ist nur sinngemäss auf Gemeindeversammlungen anwendbar. Es könnte direkt anwendbare § geben, oder Vorschriften in der Gemeindeordnung zu beachten sein, die nicht bekannt sind. Existieren weder direkt anwendbare § noch Vorschriften in der Gemeindeordnung gilt dieser § aber."
-        elif relevance == "Urnenwahl":
+        elif relevance == "Urnenwahl/Urnenabstimmung":
             applicability = "Dieser § ist direkt auf Urnenwahl anwendbar." if "Directly Applicable: Mail Voting" in article.get("tags", []) else "Dieser § ist nur sinngemäss auf Urnenwahlen anwendbar. Es könnte direkt anwendbare § geben, oder Vorschriften in der Gemeindeordnung zu beachten sein, die nicht bekannt sind."
         else:
             applicability = ""
@@ -153,8 +153,8 @@ def main_app():
 
     # User inputs
     user_query = st.text_input("Hier Ihre Frage zum Thurgauer Stimm- und Wahlrechtsgesetz eingeben:")
-    relevance_options = ["Gemeindeversammlung", "Urnenwahl", "nicht relevant"]
-    relevance = st.selectbox("Wählen Sie aus, ob sich die Frage auf Gemeindeversammlungen oder Urnenwahlen bezieht, oder ob dies nicht relevant ist:", relevance_options)
+    relevance_options = ["Gemeindeversammlung", "Urnenwahl/Urnenabstimmung", "nicht relevant"]
+    relevance = st.selectbox("Wählen Sie aus, ob sich die Frage auf Gemeindeversammlungen oder Urnenwahlen/Urnenabstimmungen bezieht, oder ob dies nicht relevant ist:", relevance_options)
 
 
     if st.button("Abschicken"):
