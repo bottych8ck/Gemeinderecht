@@ -128,7 +128,7 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
         if relevance == "Gemeindeversammlung":
             applicability = "Dieser § ist direkt auf Gemeindeversammlungen anwendbar." if "Directly Applicable: Assembly" in article.get("tags", []) else "Dieser § ist nur sinngemäss auf Gemeindeversammlungen anwendbar. Es könnte direkt anwendbare § geben, oder Vorschriften in der Gemeindeordnung zu beachten sein, die nicht bekannt sind. Existieren weder direkt anwendbare § noch Vorschriften in der Gemeindeordnung gilt dieser § aber."
         elif relevance == "Urnenwahl/Urnenabstimmung":
-            applicability = "Dieser § ist direkt auf Urnenwahl anwendbar." if "Directly Applicable: Mail Voting" in article.get("tags", []) else "Dieser § ist nur sinngemäss auf Urnenwahlen anwendbar. Es könnte direkt anwendbare § geben, oder Vorschriften in der Gemeindeordnung zu beachten sein, die nicht bekannt sind."
+            applicability = "Dieser § ist direkt auf Urnenwahlen/Urnenabstimmungen anwendbar." if "Directly Applicable: Mail Voting" in article.get("tags", []) else "Dieser § ist nur sinngemäss auf Urnenwahlen/Urnenabstimmungen anwendbar. Es könnte direkt anwendbare § geben, oder Vorschriften in der Gemeindeordnung zu beachten sein, die nicht bekannt sind."
         else:
             applicability = ""
 
@@ -146,7 +146,7 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
 
 
 def main_app():
-    st.title("Willkommen zu ChatG-TG")
+    st.title("Willkommen zu Chat-TG")
     st.subheader("Abfrage des Gesetzes über das Stimm- und Wahlrecht des Kantons Thurgau")
     if 'prompt' not in st.session_state:
         st.session_state['prompt'] = ""
