@@ -131,7 +131,7 @@ def get_article_content(title, law_data):
 def generate_html_with_js(prompt):
     return f"""
     <textarea id='text_area' style='opacity: 0; position: absolute; left: -9999px;'>{prompt}</textarea>
-    <button onclick='copyToClipboard()'>Text in die Zwischenablage kopieren</button>
+    <button onclick='copyToClipboard()'>Prompt in die Zwischenablage kopieren</button>
     <script>
     function copyToClipboard() {{
         var copyText = document.getElementById('text_area');
@@ -207,7 +207,8 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
 
 
 def main_app():
-    st.title("Abfrage des Thurgauer Gemeinderechts (KV, StWG, StWV und Gemeindegesetz)")
+    st.title("Chat_TG - Gemeinderecht")
+    st.subheader("Abfrage von folgenden Erlassen: KV, StWG, StWV und Gemeindegesetz")
     if 'prompt' not in st.session_state:
         st.session_state['prompt'] = ""
 
