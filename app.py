@@ -248,7 +248,7 @@ def main_app():
                   
             prompt = generate_prompt(user_query, relevance, st.session_state.top_articles, law_data)
             response = client.chat.completions.create(
-                modelgpt-4-0125-preview",
+                model="gpt-4-0125-preview",
                 messages=[
                     {"role": "system", "content": "Du bist eine Gesetzessumptionsmaschiene. Du beantwortest alle Fragen auf Deutsch."},
                     {"role": "user", "content": prompt}
