@@ -270,7 +270,7 @@ def main_app():
         st.warning("Bitte geben Sie eine Anfrage ein.")
 
     
-    # "Abschicken" button to display top matching articles
+    #"Hinweise" button to display top matching articles
     if st.button("Hinweise"):
         st.session_state.submitted = True  # Set the flag to True when clicked
         if user_query:
@@ -321,16 +321,16 @@ def main_app():
             st.warning("Bitte geben Sie eine Anfrage ein.")
             
     if st.session_state.submitted:
+        st.write("Nachfolgend können Sie den Prompt generieren und kopieren, um ihn einem anderen Chatbot vorzulegen und dann auch Rückfragen zu stellen")
         if st.button("Prompt generieren"):
-            st.write("Nachfolgend können Sie den Prompt generieren und kopieren, um ihn einem anderen Chatbot vorzulegen und dann auch Rückfragen zu stellen")
             if user_query and st.session_state.top_articles:
                 # Generate and display the prompt
                 prompt = generate_prompt(user_query, relevance, st.session_state.top_articles, law_data)
+                html_with_js = generate_html_with_js(prompt)
+                html(html_with_js)
                 st.text_area("Prompt:", prompt, height=300)
                 st.session_state['prompt'] = prompt
                 # Button to copy the prompt to clipboard
-                html_with_js = generate_html_with_js(prompt)
-                html(html_with_js)
             
             else:
                 if not user_query:
