@@ -322,6 +322,7 @@ def main_app():
             
     if st.session_state.submitted:
         if st.button("Prompt generieren"):
+            st.write("Nachfolgend können Sie den Prompt generieren und kopieren, um ihn einem anderen Chatbot vorzulegen und dann auch Rückfragen zu stellen")
             if user_query and st.session_state.top_articles:
                 # Generate and display the prompt
                 prompt = generate_prompt(user_query, relevance, st.session_state.top_articles, law_data)
