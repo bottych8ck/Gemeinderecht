@@ -271,20 +271,20 @@ def main_app():
 
     
     # "Abschicken" button to display top matching articles
-    if st.button("Abschicken"):
+    if st.button("Hinweise"):
         st.session_state.submitted = True  # Set the flag to True when clicked
         if user_query:
             
-            query_vector = get_embeddings(user_query)
+         #       query_vector = get_embeddings(user_query)
             
-            similarities = calculate_similarities(query_vector, article_embeddings)
+              #  similarities = calculate_similarities(query_vector, article_embeddings)
             
-            sorted_articles = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
+                #sorted_articles = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
             
-            filtered_articles = [(title, score) for title, score in sorted_articles if is_relevant_article(law_data[title], relevance)]
+                #filtered_articles = [(title, score) for title, score in sorted_articles if is_relevant_article(law_data[title], relevance)]
                         
             st.session_state.top_articles = filtered_articles[:10] 
-            st.write("Die folgenden Artikel werden angezeigt, nachdem Ihre Anfrage analysiert und mit den relevanten Gesetzesdaten abgeglichen wurde. Dieser Prozess funktioniert ähnlich wie eine intelligente Suche, bei der die Bedeutung Ihrer Worte erkannt und die passendsten Inhalte aus den Gesetzestexten ausgewählt werden. Die Bestimmungen müssen aber genau auf ihre tatächliche Anwendbarkeit hin überprüft werden. Diese Überprüfung kann durch ein LLM (Large Language Model) unterstützt werden. Im generierten Prompt sind entsprechende Anweisungen enthalten.")
+            st.write("Die folgenden Artikel bilden die Grundlage der obigen Antwort. Ihre Anfragewurde analysiert und mit den relevanten Gesetzesdaten abgeglichen, um die Artikel zu finden.")
             with st.expander("Am besten auf die Anfrage passende Artikel", expanded=False):
                 for title, score in st.session_state.top_articles:
                     # Retrieve the content of the article and the law name using the get_article_content function
