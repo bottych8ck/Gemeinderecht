@@ -223,6 +223,57 @@ def main_app():
     if 'submitted' not in st.session_state:
         st.session_state.submitted = False
 
+        if 'last_question' not in st.session_state:
+        st.session_state['last_question'] = ""
+    if 'last_answer' not in st.session_state:
+        st.session_state['last_answer'] = None
+    if 'prompt' not in st.session_state:
+        st.session_state['prompt'] = ""
+
+    user_query = st.text_input("Hier Ihre Frage eingeben:")
+    relevance_options = ["Staatspersonal", "Lehrperson VS", "Lehrperson Sek II"]
+    relevance = st.selectbox("Wählen Sie aus, ob sich die Frage auf Staatspersonal, Lehrpersonen der Volksschule oder Lehrpersonen der Berufsfach- und Mittelschulen bezieht:", relevance_options)
+
+    if 'top_articles' not in st.session_state:
+        st.session_state.top_articles = []
+    if 'submitted' not in st.session_state:
+        st.session_state.submitted = False
+
+    if st.button("Mit GPT 3.5 beantworten (.05 Fr. pro Anfrage :-) )") and user_query:
+        
+        if user_query != st.session_state['last_question']:
+            query_vector = get_embeddings(user_query)
+            similarities = calculate_similarities(query_vector, article_embeddings)
+            
+            sorted_articles = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
+            filtered_articles = [(title, score) for title, score in sorted_articles if is_relevant_article(law_data[title], relevance)]
+            
+            st.session_state.top_articles = filtered_articles[:10]
+                  
+            prompt = generate_prompt(user_query, relevance, st.session_state.top_articles, law_data)
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "Du bist eine Gesetzessumptionsmaschiene. Du beantwortest alle Fragen auf Deutsch."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+    
+            # Display the response from OpenAI
+            if response.choices:
+                ai_message = response.choices[0].message.content  # Corrected attribute access
+                st.session_state['last_question'] = user_query
+                st.session_state['last_answer'] = ai_message
+        else:
+            ai_message = st.session_state['last_answer']
+
+    if st.session_state['last_answer']:
+        st.subheader("Antwort Chat-TG:")
+        st.write(st.session_state['last_answer'])
+    else:
+        st.warning("Bitte geben Sie eine Anfrage ein.")
+
+    
     # "Abschicken" button to display top matching articles
     if st.button("Abschicken"):
         st.session_state.submitted = True  # Set the flag to True when clicked
