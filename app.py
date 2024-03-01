@@ -223,16 +223,12 @@ def main_app():
     if 'submitted' not in st.session_state:
         st.session_state.submitted = False
 
-        if 'last_question' not in st.session_state:
+    if 'last_question' not in st.session_state:
         st.session_state['last_question'] = ""
     if 'last_answer' not in st.session_state:
         st.session_state['last_answer'] = None
     if 'prompt' not in st.session_state:
         st.session_state['prompt'] = ""
-
-    user_query = st.text_input("Hier Ihre Frage eingeben:")
-    relevance_options = ["Staatspersonal", "Lehrperson VS", "Lehrperson Sek II"]
-    relevance = st.selectbox("Wählen Sie aus, ob sich die Frage auf Staatspersonal, Lehrpersonen der Volksschule oder Lehrpersonen der Berufsfach- und Mittelschulen bezieht:", relevance_options)
 
     if 'top_articles' not in st.session_state:
         st.session_state.top_articles = []
