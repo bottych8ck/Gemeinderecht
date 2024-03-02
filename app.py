@@ -238,7 +238,9 @@ def main_app():
     if st.button("Mit GPT 3.5 beantworten (.05 Fr. pro Anfrage :-) )") and user_query:
         
         if user_query != st.session_state['last_question']:
-            query_vector = get_embeddings(user_query)
+            enhanced_user_query = f"{user_query} {relevance_mapping[relevance]}"
+
+            query_vector = get_embeddings(enhanced_user_query)
             similarities = calculate_similarities(query_vector, article_embeddings)
             
             sorted_articles = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
