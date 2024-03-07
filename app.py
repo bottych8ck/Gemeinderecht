@@ -327,7 +327,7 @@ def main_app():
                         else:
                             st.write("Kein Inhalt verfügbar.")
                         st.write("")
-            else:
+        else:
                 st.warning("Bitte geben Sie eine Anfrage ein.")
 
             
