@@ -54,6 +54,31 @@ def welcome_page():
 api_key = os.getenv('OPENAI_API_KEY')
 client = openai.OpenAI(api_key=api_key)
 
+def get_applicability_message(tags, relevance):
+    applicability_messages = []
+    # For "Gemeindeversammlung" relevance
+    if relevance == "Gemeindeversammlung":
+        if "Directly Applicable: Assembly" in tags:
+            applicability_messages.append("Dieser § ist direkt auf Gemeindeversammlungen anwendbar.")
+        elif "Indirectly Applicable: Assembly" in tags:
+            applicability_messages.append("Dieser § ist nur sinngemäss auf Gemeindeversammlungen anwendbar. Das heisst, es könnte direkt anwendbare § in einem Gesetz geben. Es könnte auch direkt anwendbare § in der Gemeindeordnung der Gemeinde geben, die Gemeindeordnung ist aber nicht bekannt. Existieren keine direkt anwendbare § im Gesetz und keine anwendbare § in der Gemeindeordnung, gilt dieser indirekt anwendbare §. Gilt dieser §, muss der Inhalt des § eventuell auf die Verhältnisse in der Gemeindeversammlung angepasst werden.")
+        elif "Conditionally Applicable: Assembly" in tags:
+            applicability_messages.append("Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar: Erstens wenn die Gemeindeordnung der Gemeinde Volksbegehren wie die Volksinitiative oder ein obliatorisches oder fakultatives Referendum vorsieht. Zweitens ist der § awendbar, wenn die Gemeindeordnung für bestimmte Behörden eine Proporzwahl vorsieht.    ")
+        
+    # For "Urnenwahl" relevance
+    elif relevance == "Urnenwahl":
+        if "Directly Applicable: Mail Voting" in tags:
+            applicability_messages.append("Dieser § ist direkt auf Urnenwahl anwendbar.")
+        elif "Indirectly Applicable: Mail Voting" in tags:
+            applicability_messages.append("Dieser § ist nur sinngemäss auf Urnenwahlen anwendbar.")
+        elif "Conditionally Applicable: Mail Voting" in tags:
+            applicability_messages.append("Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar: Erstens wenn die Gemeindeordnung der Gemeinde Volksbegehren wie die Volksinitiative oder ein obliatorisches oder fakultatives Referendum vorsieht. Zweitens ist der § awendbar, wenn die Gemeindeordnung für bestimmte Behörden eine Proporzwahl vorsieht.    ")
+        
+
+    if not applicability_messages:  # If no specific applicability was determined
+        applicability_messages.append("Die Anwendbarkeit dieses § muss noch geprüft werden.")
+    
+    return " ".join(applicability_messages)
 
 def get_embeddings(text):
     res = client.embeddings.create(input=[text], model="text-embedding-ada-002")
@@ -170,6 +195,7 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
 
         content = " ".join(aggregated_content)
         tags = list(aggregated_tags)
+        applicability_message = get_applicability_message(tags, relevance)
 
         # Mixed applicability logic
         directly_applicable_assembly = "Directly Applicable: Assembly" in tags
@@ -178,7 +204,7 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
         indirectly_applicable_mail_voting = "Indirectly Applicable: Mail Voting" in tags
         conditionally_applicable_assembly = "Conditionally Applicable: Assembly" in tags 
         conditionally_applicable_mail_voting = "Conditionally Applicable: Mail Voting" in tags 
-
+"""
         # Adjusting applicability message based on mixed applicability
         applicability_messages = []
         if relevance == "Gemeindeversammlung":
@@ -187,7 +213,7 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
             elif indirectly_applicable_assembly:
                 applicability_messages.append("Dieser § ist nur sinngemäss auf Gemeindeversammlungen anwendbar. Das heisst, es könnte direkt anwendbare § in einem Gesetz geben. Es könnte auch direkt anwendbare § in der Gemeindeordnung der Gemeinde geben, die Gemeindeordnung ist aber nicht bekannt. Existieren keine direkt anwendbare § im Gesetz und keine anwendbare § in der Gemeindeordnung, gilt dieser indirekt anwendbare §. Gilt dieser §, muss der Inhalt des § eventuell auf die Verhältnisse in der Gemeindeversammlung angepasst werden.")
             elif conditionally_applicable_assembly:
-                applicability_messages.append("Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar: Ersten wenn die Gemeindeordnung der Gemeinde Volksbegehren wie die Volksinitiative oder ein obliatorisches oder fakultatives Referendum vorsieht. Zweitens ist der § awendbar, wenn die Gemeindeordnung für bestimmte Behörden eine Proporzwahl vorsieht.    ")
+                applicability_messages.append("Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar: Erstens wenn die Gemeindeordnung der Gemeinde Volksbegehren wie die Volksinitiative oder ein obliatorisches oder fakultatives Referendum vorsieht. Zweitens ist der § awendbar, wenn die Gemeindeordnung für bestimmte Behörden eine Proporzwahl vorsieht.    ")
 
         if relevance == "Urnenwahl":
             if directly_applicable_mail_voting:
@@ -199,7 +225,7 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
        
         if not applicability_messages:  # If no specific applicability was determined
             applicability_messages.append("Die Anwendbarkeit dieses § muss noch geprüft werden.")
-
+"""
         applicability = " ".join(applicability_messages)
 
         prompt += f"\n{article_number}. §: {title} von folgendem Erlass: {name}\n"
@@ -283,21 +309,20 @@ def main_app():
     if st.button("Hinweise"):
         st.session_state.submitted = True  # Set the flag to True when clicked
         if user_query:
-           
-            query_vector = get_embeddings(user_query)
-            
+            enhanced_user_query = f"{user_query} {relevance_mapping[relevance]}"
+            query_vector = get_embeddings(enhanced_user_query)
             similarities = calculate_similarities(query_vector, article_embeddings)
-            
             sorted_articles = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
-            
-            filtered_articles = [(title, score) for title, score in sorted_articles if is_relevant_article(law_data[title], relevance)]
-                        
+            filtered_articles = [(title, score) for title, score in sorted_articles if is_relevant_article(law_data[title], relevance)]           
             st.session_state.top_articles = filtered_articles[:10] 
             st.write("Die folgenden Artikel bilden die Grundlage der obigen Antwort. Ihre Anfragewurde analysiert und mit den relevanten Gesetzesdaten abgeglichen, um die Artikel zu finden.")
             with st.expander("Am besten auf die Anfrage passende Artikel", expanded=False):
                 for title, score in st.session_state.top_articles:
                     # Retrieve the content of the article and the law name using the get_article_content function
                     result = get_article_content(title, law_data)  # Adjusted to handle both standalone and grouped articles
+                    section_data = law_data.get(title, {})
+                    tags = section_data.get("tags", [])
+                    
                     if isinstance(result, list):  # This indicates a grouped article
                         for sub_title, article_content, law_name, law_url in result:
                             law_name_display = law_name if law_name else "Unbekanntes Gesetz"
