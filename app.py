@@ -195,7 +195,7 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
 
         content = " ".join(aggregated_content)
         tags = list(aggregated_tags)
-        applicability_message = get_applicability_message(tags, relevance)
+        applicability_messages = get_applicability_message(tags, relevance)
 
 
         applicability = " ".join(applicability_messages)
