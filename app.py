@@ -196,8 +196,6 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
         content = " ".join(aggregated_content)
         tags = list(aggregated_tags)
         applicability_messages = get_applicability_message(tags, relevance)
-
-
         applicability = " ".join(applicability_messages)
 
         prompt += f"\n{article_number}. §: {title} von folgendem Erlass: {name}\n"
@@ -294,7 +292,9 @@ def main_app():
                     result = get_article_content(title, law_data)  # Adjusted to handle both standalone and grouped articles
                     section_data = law_data.get(title, {})
                     tags = section_data.get("tags", [])
-                    
+                    # Use the newly defined function to get the applicability message based on tags and relevance
+                    applicability_message = get_applicability_message(tags, relevance)
+            
                     if isinstance(result, list):  # This indicates a grouped article
                         for sub_title, article_content, law_name, law_url in result:
                             law_name_display = law_name if law_name else "Unbekanntes Gesetz"
@@ -302,7 +302,9 @@ def main_app():
                                 law_name_display = f"<a href='{law_url}' target='_blank'>{law_name_display}</a>"
                             
                             st.markdown(f"**{sub_title} - {law_name_display}**", unsafe_allow_html=True)
-                            
+                            # Display the applicability message for each sub-article
+                            st.write(f"Anwendbarkeit: {applicability_message}")
+            
                             if article_content:  # Check if there is content available for the article
                                 for paragraph in article_content:
                                     st.write(paragraph)
@@ -316,15 +318,18 @@ def main_app():
                             law_name_display = f"<a href='{law_url}' target='_blank'>{law_name_display}</a>"
                         
                         st.markdown(f"**{title} - {law_name_display}**", unsafe_allow_html=True)
-                        
+                        # Display the applicability message for the standalone article
+                        st.write(f"Anwendbarkeit: {applicability_message}")
+            
                         if article_content:
                             for paragraph in article_content:
                                 st.write(paragraph)
                         else:
                             st.write("Kein Inhalt verfügbar.")
                         st.write("")
-        else:
-            st.warning("Bitte geben Sie eine Anfrage ein.")
+            else:
+                st.warning("Bitte geben Sie eine Anfrage ein.")
+
             
     if st.session_state.submitted:
         st.write("Nachfolgend können Sie den Prompt generieren und kopieren, um ihn einem anderen Chatbot vorzulegen und dann auch Rückfragen zu stellen")
