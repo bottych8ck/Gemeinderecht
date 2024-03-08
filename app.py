@@ -82,8 +82,6 @@ def get_applicability_message(tags, relevance):
 
 
 
- 
-
 def get_embeddings(text):
     res = client.embeddings.create(input=[text], model="text-embedding-ada-002")
     return res.data[0].embedding
@@ -199,8 +197,7 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
 
         content = " ".join(aggregated_content)
         tags = list(aggregated_tags)
-        applicability_messages = get_applicability_message(tags, relevance)
-        applicability = " ".join(applicability_messages)
+        applicability = get_applicability_message(tags, relevance)
 
         prompt += f"\n{article_number}. §: {title} von folgendem Erlass: {name}\n"
         prompt += f"   - Anwendbarkeit: {applicability}\n"
