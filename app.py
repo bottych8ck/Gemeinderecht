@@ -301,6 +301,7 @@ def main_app():
                         for sub_title, article_content, law_name, law_url in result:
                             sub_section_data = section_data.get(sub_title, {})
                             sub_tags = sub_section_data.get("tags", [])
+                            print(sub_tags)
                             applicability_message = get_applicability_message(sub_tags, relevance)
 
                             law_name_display = law_name if law_name else "Unbekanntes Gesetz"
@@ -321,7 +322,7 @@ def main_app():
                         law_name_display = law_name if law_name else "Unbekanntes Gesetz"
                         tags = section_data.get("tags", [])
                         applicability_message = get_applicability_message(tags, relevance)
-            
+                    
                         if law_url:
                             law_name_display = f"<a href='{law_url}' target='_blank'>{law_name_display}</a>"
                         
