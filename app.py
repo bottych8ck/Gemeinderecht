@@ -305,9 +305,7 @@ def main_app():
                                 
                             st.markdown(f"**{sub_title} - {law_name_display}**", unsafe_allow_html=True)
                             st.write(f"Anwendbarkeit: {applicability_message}")
-                            # Display the applicability message for each sub-article
-                            st.write(f"Anwendbarkeit: {applicability_message}")
-            
+                               
                             if article_content:  # Check if there is content available for the article
                                 for paragraph in article_content:
                                     st.write(paragraph)
@@ -317,6 +315,9 @@ def main_app():
                     elif isinstance(result, tuple):  # This indicates a standalone article
                         article_content, law_name, law_url = result
                         law_name_display = law_name if law_name else "Unbekanntes Gesetz"
+                        tags = section_data.get("tags", [])
+                        applicability_message = get_applicability_message(tags, relevance)
+            
                         if law_url:
                             law_name_display = f"<a href='{law_url}' target='_blank'>{law_name_display}</a>"
                         
