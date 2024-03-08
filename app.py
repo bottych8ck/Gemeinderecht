@@ -139,9 +139,9 @@ def get_article_content(title, law_data):
                 sub_content = data.get('Inhalt', [])
                 sub_law_name = data.get("Name", law_name)
                 sub_law_url = data.get("URL", "")
-                
+                sub_tags = data.get("tags", [])  # Extract tags
                 # Append a tuple with the sub-article's title, its content, law name, and URL
-                grouped_content.append((subsection, sub_content, sub_law_name, sub_law_url))
+                grouped_content.append((subsection, sub_content, sub_law_name, sub_law_url, sub_tags))
                 
         return grouped_content  # Return a list of tuples for grouped articles
     else:
@@ -149,9 +149,10 @@ def get_article_content(title, law_data):
         all_paragraphs = section_data.get('Inhalt', [])
         law_name = section_data.get("Name", law_name)
         law_url = section_data.get("URL", law_url)
-        
+        tags = section_data.get("tags", [])  # Extract tags for standalone articles
+
         # Return content, law name, and law URL in a tuple for standalone articles
-        return [(title, all_paragraphs, law_name, law_url)]
+        return [(title, all_paragraphs, law_name, law_url, tags)]
 
 
 
@@ -291,14 +292,15 @@ def main_app():
                 for title, score in st.session_state.top_articles:
                     # Retrieve the content of the article and the law name using the get_article_content function
                     result = get_article_content(title, law_data)  # Adjusted to handle both standalone and grouped articles
-                    if isinstance(result, list):  # This indicates a grouped article
+                   if isinstance(result, list):  # This indicates a grouped article
                         for sub_title, article_content, law_name, law_url in result:
                             law_name_display = law_name if law_name else "Unbekanntes Gesetz"
+                            applicability = get_applicability_message(tags, relevance) # Neu für Anzeige Anwendbarkeit
                             if law_url:  # Check if a URL is available
                                 law_name_display = f"<a href='{law_url}' target='_blank'>{law_name_display}</a>"
                             
                             st.markdown(f"**{sub_title} - {law_name_display}**", unsafe_allow_html=True)
-                            
+                            st.markdown(f"*Anwendbarkeit: {applicability}*")
                             if article_content:  # Check if there is content available for the article
                                 for paragraph in article_content:
                                     st.write(paragraph)
@@ -308,10 +310,12 @@ def main_app():
                     elif isinstance(result, tuple):  # This indicates a standalone article
                         article_content, law_name, law_url = result
                         law_name_display = law_name if law_name else "Unbekanntes Gesetz"
+                        applicability = get_applicability_message(tags, relevance)
                         if law_url:
                             law_name_display = f"<a href='{law_url}' target='_blank'>{law_name_display}</a>"
                         
                         st.markdown(f"**{title} - {law_name_display}**", unsafe_allow_html=True)
+                        st.markdown(f"*Anwendbarkeit: {applicability}*")
                         
                         if article_content:
                             for paragraph in article_content:
