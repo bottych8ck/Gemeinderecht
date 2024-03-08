@@ -54,7 +54,31 @@ def welcome_page():
 api_key = os.getenv('OPENAI_API_KEY')
 client = openai.OpenAI(api_key=api_key)
 
+def get_applicability_message(tags, relevance):
+    # Initialize with the default message
+    default_message = "Die Anwendbarkeit dieses § muss noch geprüft werden."
+    applicability_messages = []
 
+    for tag in tags:
+        if relevance == "Gemeindeversammlung":
+            if "Directly Applicable: Assembly" == tag:
+                return "Dieser § ist direkt auf Gemeindeversammlungen anwendbar."
+            elif "Indirectly Applicable: Assembly" == tag:
+                return "Dieser § ist nur sinngemäss auf Gemeindeversammlungen anwendbar..."
+            elif "Conditionally Applicable: Assembly" == tag:
+                return "Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar..."
+        
+        elif relevance == "Urnenwahl":
+            if "Directly Applicable: Mail Voting" == tag:
+                return "Dieser § ist direkt auf Urnenwahl anwendbar."
+            elif "Indirectly Applicable: Mail Voting" == tag:
+                return "Dieser § ist nur sinngemäss auf Urnenwahlen anwendbar."
+            elif "Conditionally Applicable: Mail Voting" == tag:
+                return "Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar..."
+
+    # If none of the specific conditions are met, return the default message
+    return default_message
+    
 def get_embeddings(text):
     res = client.embeddings.create(input=[text], model="text-embedding-ada-002")
     return res.data[0].embedding
@@ -112,9 +136,9 @@ def get_article_content(title, law_data):
                 sub_content = data.get('Inhalt', [])
                 sub_law_name = data.get("Name", law_name)
                 sub_law_url = data.get("URL", "")
-                
+                sub_tags = data.get("tags", [])  # Extract tags
                 # Append a tuple with the sub-article's title, its content, law name, and URL
-                grouped_content.append((subsection, sub_content, sub_law_name, sub_law_url))
+                grouped_content.append((subsection, sub_content, sub_law_name, sub_law_url, sub_tags))
                 
         return grouped_content  # Return a list of tuples for grouped articles
     else:
@@ -122,9 +146,10 @@ def get_article_content(title, law_data):
         all_paragraphs = section_data.get('Inhalt', [])
         law_name = section_data.get("Name", law_name)
         law_url = section_data.get("URL", law_url)
-        
+        tags = section_data.get("tags", [])  # Extract tags for standalone articles
+
         # Return content, law name, and law URL in a tuple for standalone articles
-        return [(title, all_paragraphs, law_name, law_url)]
+        return [(title, all_paragraphs, law_name, law_url, tags)]
 
 
 
@@ -168,32 +193,8 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
             aggregated_tags = set(section_data.get("tags", []))
             name = section_data.get("Name", "Unbekanntes Gesetz")
 
-        content = " ".join(aggregated_content)
         tags = list(aggregated_tags)
-
-        # Mixed applicability logic
-        directly_applicable_assembly = "Directly Applicable: Assembly" in tags
-        directly_applicable_mail_voting = "Directly Applicable: Mail Voting" in tags
-        indirectly_applicable_assembly = "Indirectly Applicable: Assembly" in tags
-        indirectly_applicable_mail_voting = "Indirectly Applicable: Mail Voting" in tags
-
-        # Adjusting applicability message based on mixed applicability
-        applicability_messages = []
-        if relevance == "Gemeindeversammlung":
-            if directly_applicable_assembly:
-                applicability_messages.append("Dieser § ist direkt auf Gemeindeversammlungen anwendbar.")
-            elif indirectly_applicable_assembly:
-                applicability_messages.append("Dieser § ist nur sinngemäss auf Gemeindeversammlungen anwendbar.")
-        if relevance == "Urnenwahl":
-            if directly_applicable_mail_voting:
-                applicability_messages.append("Dieser § ist direkt auf Urnenwahl anwendbar.")
-            elif indirectly_applicable_mail_voting:
-                applicability_messages.append("Dieser § ist nur sinngemäss auf Urnenwahl anwendbar.")
-
-        if not applicability_messages:  # If no specific applicability was determined
-            applicability_messages.append("Die Anwendbarkeit dieses § muss noch geprüft werden.")
-
-        applicability = " ".join(applicability_messages)
+        applicability = get_applicability_message(tags, relevance)
 
         prompt += f"\n{article_number}. §: {title} von folgendem Erlass: {name}\n"
         prompt += f"   - Anwendbarkeit: {applicability}\n"
@@ -270,19 +271,15 @@ def main_app():
         st.warning("Bitte geben Sie eine Anfrage ein.")
 
     
-    #"Hinweise" button to display top matching articles
+  #"Hinweise" button to display top matching articles
     if st.button("Hinweise"):
         st.session_state.submitted = True  # Set the flag to True when clicked
         if user_query:
-           
-            query_vector = get_embeddings(user_query)
-            
+            enhanced_user_query = f"{user_query} {relevance_mapping[relevance]}"
+            query_vector = get_embeddings(enhanced_user_query)
             similarities = calculate_similarities(query_vector, article_embeddings)
-            
             sorted_articles = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
-            
-            filtered_articles = [(title, score) for title, score in sorted_articles if is_relevant_article(law_data[title], relevance)]
-                        
+            filtered_articles = [(title, score) for title, score in sorted_articles if is_relevant_article(law_data[title], relevance)]           
             st.session_state.top_articles = filtered_articles[:10] 
             st.write("Die folgenden Artikel bilden die Grundlage der obigen Antwort. Ihre Anfragewurde analysiert und mit den relevanten Gesetzesdaten abgeglichen, um die Artikel zu finden.")
             with st.expander("Am besten auf die Anfrage passende Artikel", expanded=False):
@@ -290,13 +287,14 @@ def main_app():
                     # Retrieve the content of the article and the law name using the get_article_content function
                     result = get_article_content(title, law_data)  # Adjusted to handle both standalone and grouped articles
                     if isinstance(result, list):  # This indicates a grouped article
-                        for sub_title, article_content, law_name, law_url in result:
+                        for sub_title, article_content, law_name, law_url, tags in result:
                             law_name_display = law_name if law_name else "Unbekanntes Gesetz"
+                            applicability = get_applicability_message(tags, relevance) # Neu für Anzeige Anwendbarkeit
                             if law_url:  # Check if a URL is available
                                 law_name_display = f"<a href='{law_url}' target='_blank'>{law_name_display}</a>"
                             
                             st.markdown(f"**{sub_title} - {law_name_display}**", unsafe_allow_html=True)
-                            
+                            st.markdown(f"*Anwendbarkeit: {applicability}*")
                             if article_content:  # Check if there is content available for the article
                                 for paragraph in article_content:
                                     st.write(paragraph)
@@ -306,10 +304,12 @@ def main_app():
                     elif isinstance(result, tuple):  # This indicates a standalone article
                         article_content, law_name, law_url = result
                         law_name_display = law_name if law_name else "Unbekanntes Gesetz"
+                        applicability = get_applicability_message(tags, relevance)
                         if law_url:
                             law_name_display = f"<a href='{law_url}' target='_blank'>{law_name_display}</a>"
                         
                         st.markdown(f"**{title} - {law_name_display}**", unsafe_allow_html=True)
+                        st.markdown(f"*Anwendbarkeit: {applicability}*")
                         
                         if article_content:
                             for paragraph in article_content:
