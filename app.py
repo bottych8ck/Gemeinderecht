@@ -64,17 +64,17 @@ def get_applicability_message(tags, relevance):
             if "Directly Applicable: Assembly" == tag:
                 return "Dieser § ist direkt auf Gemeindeversammlungen anwendbar."
             elif "Indirectly Applicable: Assembly" == tag:
-                return "Dieser § ist nur sinngemäss auf Gemeindeversammlungen anwendbar..."
+                return "Dieser § ist nur sinngemäss auf Gemeindeversammlungen anwendbar. Das heisst, es könnte direkt anwendbare § in einem Gesetz geben. Es könnte auch direkt anwendbare § in der Gemeindeordnung der Gemeinde geben, die Gemeindeordnung ist aber nicht bekannt. Existieren keine direkt anwendbare § im Gesetz und keine anwendbare § in der Gemeindeordnung, gilt dieser indirekt anwendbare §. Gilt dieser §, muss der Inhalt des § eventuell auf die Verhältnisse in der Gemeindeversammlung angepasst werden."
             elif "Conditionally Applicable: Assembly" == tag:
-                return "Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar..."
+                return "Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar, namentlich wenn in der Gemeinde Volksrechte wie Initiativen und Referenden möglich sind. Dies muss insbesondere in der Gemeindeordnung überprüft werden."
         
         elif relevance == "Urnenwahl":
             if "Directly Applicable: Mail Voting" == tag:
                 return "Dieser § ist direkt auf Urnenwahl anwendbar."
             elif "Indirectly Applicable: Mail Voting" == tag:
-                return "Dieser § ist nur sinngemäss auf Urnenwahlen anwendbar."
+                return "Dieser § ist nur sinngemäss auf Urnenwahlen anwendbar. Das heisst, es könnte direkt anwendbare § in einem Gesetz geben. Es könnte auch direkt anwendbare § in der Gemeindeordnung der Gemeinde geben, die Gemeindeordnung ist aber nicht bekannt. Existieren keine direkt anwendbare § im Gesetz und keine anwendbare § in der Gemeindeordnung, gilt dieser indirekt anwendbare §. Gilt dieser §, muss der Inhalt des § eventuell auf die Verhältnisse au Urnenabstimmunen angepasst werden."
             elif "Conditionally Applicable: Mail Voting" == tag:
-                return "Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar..."
+                return "Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar. Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar, namentlich wenn in der Gemeinde Volksrechte wie Initiativen und Referenden möglich sind. Dies muss insbesondere in der Gemeindeordnung überprüft werden."
 
     # If none of the specific conditions are met, return the default message
     return default_message
