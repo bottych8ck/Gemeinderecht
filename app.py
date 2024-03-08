@@ -293,7 +293,7 @@ def main_app():
                     # Retrieve the content of the article and the law name using the get_article_content function
                     result = get_article_content(title, law_data)  # Adjusted to handle both standalone and grouped articles
                     if isinstance(result, list):  # This indicates a grouped article
-                        for sub_title, article_content, law_name, law_url in result:
+                        for sub_title, article_content, law_name, law_url, tags in result:
                             law_name_display = law_name if law_name else "Unbekanntes Gesetz"
                             applicability = get_applicability_message(tags, relevance) # Neu für Anzeige Anwendbarkeit
                             if law_url:  # Check if a URL is available
