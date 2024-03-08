@@ -56,33 +56,34 @@ client = openai.OpenAI(api_key=api_key)
 
 def get_applicability_message(tags, relevance):
     applicability_messages = []
-    # For "Gemeindeversammlung" relevance
-    if relevance == "Gemeindeversammlung":
-        for tag in tags:
-            if "Directly Applicable: Assembly" == tag:
+    print(f"Debug - Tags received: {tags}")  # Debugging line to print tags
+
+    # Check tags and relevance
+    for tag in tags:
+        print(f"Debug - Checking tag: {tag}")  # Debugging line to print current tag being checked
+        if relevance == "Gemeindeversammlung":
+            if tag == "Directly Applicable: Assembly":
                 applicability_messages.append("Dieser § ist direkt auf Gemeindeversammlungen anwendbar.")
-                break  # Assuming only one message is needed
-            elif "Indirectly Applicable: Assembly" == tag:
+                break
+            elif tag == "Indirectly Applicable: Assembly":
                 applicability_messages.append("Dieser § ist nur sinngemäss auf Gemeindeversammlungen anwendbar...")
                 break
-            elif "Conditionally Applicable: Assembly" == tag:
+            elif tag == "Conditionally Applicable: Assembly":
                 applicability_messages.append("Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar...")
                 break
-    
-    # For "Urnenwahl" relevance
-    elif relevance == "Urnenwahl":
-        for tag in tags:
-            if "Directly Applicable: Mail Voting" == tag:
+        
+        elif relevance == "Urnenwahl":
+            if tag == "Directly Applicable: Mail Voting":
                 applicability_messages.append("Dieser § ist direkt auf Urnenwahl anwendbar.")
                 break
-            elif "Indirectly Applicable: Mail Voting" == tag:
+            elif tag == "Indirectly Applicable: Mail Voting":
                 applicability_messages.append("Dieser § ist nur sinngemäss auf Urnenwahlen anwendbar.")
                 break
-            elif "Conditionally Applicable: Mail Voting" == tag:
+            elif tag == "Conditionally Applicable: Mail Voting":
                 applicability_messages.append("Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar...")
                 break
 
-    if not applicability_messages:  # If no specific applicability was determined
+    if not applicability_messages:
         applicability_messages.append("Die Anwendbarkeit dieses § muss noch geprüft werden.")
 
     return " ".join(applicability_messages)
