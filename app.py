@@ -59,25 +59,26 @@ def get_applicability_message(tags, relevance):
     # For "Gemeindeversammlung" relevance
     if relevance == "Gemeindeversammlung":
         if "Directly Applicable: Assembly" in tags:
-            applicability_messages.append("*Dieser § ist direkt auf Gemeindeversammlungen anwendbar.*")
+            applicability_messages.append("Dieser § ist direkt auf Gemeindeversammlungen anwendbar.")
         elif "Indirectly Applicable: Assembly" in tags:
-            applicability_messages.append("*Dieser § ist nur sinngemäss auf Gemeindeversammlungen anwendbar...*")
+            applicability_messages.append("Dieser § ist nur sinngemäss auf Gemeindeversammlungen anwendbar. Das heisst, es könnte direkt anwendbare § in einem Gesetz geben. Es könnte auch direkt anwendbare § in der Gemeindeordnung der Gemeinde geben, die Gemeindeordnung ist aber nicht bekannt. Existieren keine direkt anwendbare § im Gesetz und keine anwendbare § in der Gemeindeordnung, gilt dieser indirekt anwendbare §. Gilt dieser §, muss der Inhalt des § eventuell auf die Verhältnisse in der Gemeindeversammlung angepasst werden.")
         elif "Conditionally Applicable: Assembly" in tags:
-            applicability_messages.append("*Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar...*")
+            applicability_messages.append("Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar: Erstens wenn die Gemeindeordnung der Gemeinde Volksbegehren wie die Volksinitiative oder ein obliatorisches oder fakultatives Referendum vorsieht. Zweitens ist der § anwendbar, wenn die Gemeindeordnung für bestimmte Behörden eine Proporzwahl vorsieht.")
         
     # For "Urnenwahl" relevance
     elif relevance == "Urnenwahl":
         if "Directly Applicable: Mail Voting" in tags:
-            applicability_messages.append("*Dieser § ist direkt auf Urnenwahl anwendbar.*")
+            applicability_messages.append("Dieser § ist direkt auf Urnenwahl anwendbar.")
         elif "Indirectly Applicable: Mail Voting" in tags:
-            applicability_messages.append("*Dieser § ist nur sinngemäss auf Urnenwahlen anwendbar.*")
+            applicability_messages.append("Dieser § ist nur sinngemäss auf Urnenwahlen anwendbar.")
         elif "Conditionally Applicable: Mail Voting" in tags:
-            applicability_messages.append("*Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar...*")
-    
+            applicability_messages.append("Dieser § ist nur sinngemäss und nur in bestimmten Fällen anwendbar: Erstens wenn die Gemeindeordnung der Gemeinde Volksbegehren wie die Volksinitiative oder ein obliatorisches oder fakultatives Referendum vorsieht. Zweitens ist der § anwendbar, wenn die Gemeindeordnung für bestimmte Behörden eine Proporzwahl vorsieht.")
+
     if not applicability_messages:  # If no specific applicability was determined
-        applicability_messages.append("*Die Anwendbarkeit dieses § muss noch geprüft werden.*")
+        applicability_messages.append("Die Anwendbarkeit dieses § muss noch geprüft werden.")
 
     return " ".join(applicability_messages)
+
 
  
 
