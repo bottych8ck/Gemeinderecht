@@ -77,8 +77,10 @@ def get_applicability_message(tags, relevance):
 
     if not applicability_messages:  # If no specific applicability was determined
         applicability_messages.append("Die Anwendbarkeit dieses § muss noch geprüft werden.")
+
+    formatted_message = " ".join(messages)
+    return f"*{formatted_message}*"
     
-    return " ".join(applicability_messages)
 
 def get_embeddings(text):
     res = client.embeddings.create(input=[text], model="text-embedding-ada-002")
