@@ -294,23 +294,14 @@ def main_app():
                 for title, score in st.session_state.top_articles:
                     # Retrieve the content of the article and the law name using the get_article_content function
                     result = get_article_content(title, law_data)  # Adjusted to handle both standalone and grouped articles
-                    section_data = law_data.get(title, {})
-            
                     if isinstance(result, list):  # This indicates a grouped article
-                        
                         for sub_title, article_content, law_name, law_url in result:
-                            sub_section_data = section_data.get(sub_title, {})
-                            sub_tags = sub_section_data.get("tags", [])
-                            print(sub_tags)
-                            applicability_message = get_applicability_message(sub_tags, relevance)
-
                             law_name_display = law_name if law_name else "Unbekanntes Gesetz"
                             if law_url:  # Check if a URL is available
                                 law_name_display = f"<a href='{law_url}' target='_blank'>{law_name_display}</a>"
-                                
+                            
                             st.markdown(f"**{sub_title} - {law_name_display}**", unsafe_allow_html=True)
-                            st.write(f"Anwendbarkeit: {applicability_message}")
-                               
+                            
                             if article_content:  # Check if there is content available for the article
                                 for paragraph in article_content:
                                     st.write(paragraph)
@@ -320,16 +311,11 @@ def main_app():
                     elif isinstance(result, tuple):  # This indicates a standalone article
                         article_content, law_name, law_url = result
                         law_name_display = law_name if law_name else "Unbekanntes Gesetz"
-                        tags = section_data.get("tags", [])
-                        applicability_message = get_applicability_message(tags, relevance)
-                    
                         if law_url:
                             law_name_display = f"<a href='{law_url}' target='_blank'>{law_name_display}</a>"
                         
                         st.markdown(f"**{title} - {law_name_display}**", unsafe_allow_html=True)
-                        # Display the applicability message for the standalone article
-                        st.write(f"Anwendbarkeit: {applicability_message}")
-            
+                        
                         if article_content:
                             for paragraph in article_content:
                                 st.write(paragraph)
@@ -337,8 +323,7 @@ def main_app():
                             st.write("Kein Inhalt verfügbar.")
                         st.write("")
         else:
-                st.warning("Bitte geben Sie eine Anfrage ein.")
-
+            st.warning("Bitte geben Sie eine Anfrage ein.")
             
     if st.session_state.submitted:
         st.write("Nachfolgend können Sie den Prompt generieren und kopieren, um ihn einem anderen Chatbot vorzulegen und dann auch Rückfragen zu stellen")
