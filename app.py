@@ -291,17 +291,20 @@ def main_app():
                     # Retrieve the content of the article and the law name using the get_article_content function
                     result = get_article_content(title, law_data)  # Adjusted to handle both standalone and grouped articles
                     section_data = law_data.get(title, {})
-                    tags = section_data.get("tags", [])
-                    # Use the newly defined function to get the applicability message based on tags and relevance
-                    applicability_message = get_applicability_message(tags, relevance)
             
                     if isinstance(result, list):  # This indicates a grouped article
+                        
                         for sub_title, article_content, law_name, law_url in result:
+                            sub_section_data = section_data.get(sub_title, {})
+                            sub_tags = sub_section_data.get("tags", [])
+                            applicability_message = get_applicability_message(sub_tags, relevance)
+
                             law_name_display = law_name if law_name else "Unbekanntes Gesetz"
                             if law_url:  # Check if a URL is available
                                 law_name_display = f"<a href='{law_url}' target='_blank'>{law_name_display}</a>"
-                            
+                                
                             st.markdown(f"**{sub_title} - {law_name_display}**", unsafe_allow_html=True)
+                            st.write(f"Anwendbarkeit: {applicability_message}")
                             # Display the applicability message for each sub-article
                             st.write(f"Anwendbarkeit: {applicability_message}")
             
