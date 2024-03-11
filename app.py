@@ -192,7 +192,8 @@ def generate_prompt(user_query, relevance, top_articles, law_data):
             aggregated_content = section_data.get("Inhalt", [])
             aggregated_tags = set(section_data.get("tags", []))
             name = section_data.get("Name", "Unbekanntes Gesetz")
-
+            
+        content = " ".join(aggregated_content)
         tags = list(aggregated_tags)
         applicability = get_applicability_message(tags, relevance)
 
